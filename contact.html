@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Cinemorix</title>
+    <link rel="stylesheet" href="contact.css">
+</head>
+<body>
+    <header class="nav-header">
+        <nav id="nav">
+
+            <a href="index.html"><img src="/Assets/logo.png" alt="Logo"/></a>
+            <a href="index.html">Home</a>
+            <a href="#">Graphics Designer</a>
+            <a href="#">3D Model Animation</a>
+            <a href="#">Video Editing</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="contact-header">
+            <h1>Contact Us</h1>
+            <p>We'd love to hear from you. Please fill out the form below.</p>
+        </div>
+
+        <div class="contact-form">
+            <form id="contactForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required placeholder="Your Name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="Your Email">
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" required placeholder="Your Message"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+        </div>
+
+        <div class="contact-info">
+            <h2>Other Ways to Reach Us</h2>
+            <p>Email: info@cinemorix.com</p>
+            <p>Phone: +91 70963 06862</p>
+            <p>Address: 123 Movie Street, Cinema City, MC 12345</p>
+        </div>
+
+        <!-- Added new section for displaying submissions -->
+        <div class="submissions-section">
+            <h2>Recent Submissions</h2>
+            <div id="submissionsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Function to fetch and display submissions
+        async function fetchSubmissions() {
+            try {
+                const response = await fetch('http://localhost:3000/api/contacts');
+                const submissions = await response.json();
+                
+                const submissionsList = document.getElementById('submissionsList');
+                submissionsList.innerHTML = submissions.map(submission => `
+                    <div class="submission-card">
+                        <h3>${submission.name}</h3>
+                        <p><strong>Email:</strong> ${submission.email}</p>
+                        <p><strong>Message:</strong> ${submission.message}</p>
+                        <p><strong>Date:</strong> ${new Date(submission.createdAt).toLocaleDateString()}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error fetching submissions:', error);
+            }
+        }
+
+        // Fetch submissions when page loads
+        fetchSubmissions();
+
+        document.getElementById('contactForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+
+            try {
+                const response = await fetch('http://localhost:3000/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Message sent successfully!');
+                    e.target.reset();
+                    // Refresh the submissions list after new submission
+                    fetchSubmissions();
+                } else {
+                    alert(data.error || 'Failed to send message');
+                }
+            } catch (error) {
+                alert('Error sending message');
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
